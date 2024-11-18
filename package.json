@@ -15,5 +15,8 @@
     "url": "https://github.com/Stutiraii/CWBackend/issues"
   },
   "homepage": "https://github.com/Stutiraii/CWBackend#readme",
-  "description": ""
+  "description": "",
+  "dependencies": {
+    "mongodb": "^6.10.0"
+  }
 }
