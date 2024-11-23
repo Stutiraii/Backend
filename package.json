@@ -22,7 +22,8 @@
     "lodash": "^4.17.21",
     "mongodb": "^6.10.0",
     "morgan": "^1.10.0",
-    "mustache": "^4.2.0"
+    "mustache": "^4.2.0",
+    "properties-reader": "^2.3.0"
   },
   "description": ""
 }
