@@ -17,10 +17,11 @@
   },
   "homepage": "https://github.com/Stutiraii/CWBackend#readme",
   "dependencies": {
+    "cors": "^2.8.5",
     "lodash": "^4.17.21",
     "mongodb": "^6.10.0",
+    "morgan": "^1.10.0",
     "mustache": "^4.2.0"
   },
-  "devDependencies": {},
   "description": ""
 }
