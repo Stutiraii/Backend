@@ -28,23 +28,22 @@ let db;
 
 //Connect to MongoDB Atlas
 MongoClient.connect(mongoURI, {
-  useNewUrlParser: true, // Ensures MongoDB client parses the URL correctly
-  useUnifiedTopology: true, // Avoids deprecated warnings and improves connection management
-  serverApi: { version: ServerApiVersion.v1 } // Optional but recommended for compatibility with MongoDB Atlas
-})
-  .then(client => {
-    console.log("Connected to MongoDB Atlas!");
-    db = client.db(dbName); // Specify the database you want to use
-
-    // Start the server once connected to MongoDB
-    app.listen(3000, function () {
-      console.log("App started on port 3000");
-    });
+    serverApi: { version: ServerApiVersion.v1 }
   })
-  .catch(err => {
-    console.error("Error connecting to MongoDB Atlas", err);
-    process.exit(1); // Exit the process if MongoDB connection fails
-  });
+    .then(client => {
+      console.log("Connected to MongoDB Atlas!");
+      db = client.db(dbName); // Specify the database you want to use
+  
+      // Start the server once connected to MongoDB
+      app.listen(3000, function () {
+        console.log("App started on port 3000");
+      });
+    })
+    .catch(err => {
+      console.error("Error connecting to MongoDB Atlas", err);
+      process.exit(1); // Exit the process if MongoDB connection fails
+    });
+  
 
 // Middleware to log the request method and URL
 app.use((req, res, next) => {
