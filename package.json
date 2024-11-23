@@ -18,6 +18,7 @@
   "homepage": "https://github.com/Stutiraii/CWBackend#readme",
   "dependencies": {
     "cors": "^2.8.5",
+    "express": "^4.21.1",
     "lodash": "^4.17.21",
     "mongodb": "^6.10.0",
     "morgan": "^1.10.0",
