@@ -12,15 +12,13 @@
   },
   "author": "Stuti Rai",
   "license": "ISC",
-  "bugs": {
-    "url": "https://github.com/Stutiraii/CWBackend/issues"
-  },
+
   "homepage": "https://github.com/Stutiraii/CWBackend#readme",
   "dependencies": {
     "cors": "^2.8.5",
     "express": "^4.21.1",
     "lodash": "^4.17.21",
-    "mongodb": "^6.10.0",
+    "mongodb": "^4.12.1",
     "morgan": "^1.10.0",
     "mustache": "^4.2.0",
     "properties-reader": "^2.3.0"
