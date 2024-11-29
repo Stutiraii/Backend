@@ -125,24 +125,31 @@ app.post('/collections/:collectionName', function(req, res, next) {
 // PUT (update) an existing document by ID in the specified collection
 app.put("/collections/:collectionName/:id", async (req, res, next) => {
   try {
-    // Ensure the id is a valid ObjectId
-    const lessonId = new ObjectId(req.params.id);  // Convert string to ObjectId
-    const lesson = await Lesson.findById(lessonId); // Find the lesson by ObjectId
+    const lessonId = new ObjectId(req.params.id);  // Convert the ID to ObjectId
+    const { availableSpaces } = req.body;  // Get the availableSpaces from the request body
 
-    if (!lesson) {
+    // Ensure the availableSpaces field is provided
+    if (typeof availableSpaces === 'undefined') {
+      return res.status(400).send('availableSpaces field is required');
+    }
+
+    // Find the lesson by ID and update availableSpaces
+    const result = await req.collection.updateOne(
+      { _id: lessonId },  // Filter by lesson ID
+      { $set: { availableSpaces } }  // Set the new availableSpaces value
+    );
+
+    if (result.matchedCount === 0) {
       return res.status(404).send('Lesson not found');
     }
 
-    // Update the available spaces
-    lesson.availableSpaces = req.body.availableSpaces;
-    await lesson.save();  // Save the updated lesson
-
-    res.send(lesson);  // Send the updated lesson back
+    res.send({ msg: 'Lesson updated successfully' });  // Send a success message
   } catch (error) {
     console.error('Error updating lesson:', error);
     res.status(500).send(`Failed to update lesson: ${error.message}`);
   }
 });
+
 
 // DELETE a document by ID from the specified collection
 app.delete("/collections/:collectionName/:id", function (req, res, next) {
