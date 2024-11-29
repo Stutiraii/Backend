@@ -38,10 +38,10 @@ client.connect()
   .then(() => {
     console.log("Connected to MongoDB Atlas!");
     
-    // Start the server only after successful connection to MongoDB
-    app.listen(3000, () => {
-      console.log("Server running on port 3000");
+    app.listen(process.env.PORT || 3000, () => {
+      console.log(`Server running on port ${process.env.PORT || 3000}`);
     });
+    
   })
   .catch(err => {
     console.error("Error connecting to MongoDB Atlas", err);
@@ -55,6 +55,11 @@ app.param("collectionName", function (req, res, next, collectionName) {
 });
 
 // Routes
+
+// Root route
+app.get("/", (req, res) => {
+  res.send("Welcome to the backend API!");
+}); 
 
 // GET all documents in the specified collection
 app.get("/collections/:collectionName", function (req, res, next) {
