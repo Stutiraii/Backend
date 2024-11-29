@@ -55,22 +55,32 @@ app.param("collectionName", function (req, res, next, collectionName) {
   next();
 });
 
+// Define the static file path
+const staticPath = path.join(__dirname, "static");
 
-const staticPath= path.join(__dirname,"static");
-app.use( function(req,res,next){
-  const filePath= path.join(__dirname,"static",req.url);
-  fs.stat(filePath,function(err,fileInfo){
-    if(err){
+// Middleware to serve static files
+app.use((req, res, next) => {
+  const filePath = path.join(staticPath, req.url);
+
+  // Check if the file exists
+  fs.stat(filePath, (err, fileInfo) => {
+    if (err || !fileInfo.isFile()) {
+      // If file doesn't exist, pass to the next middleware
       next();
-        return;
+      return;
     }
+
+    // Serve the file if it exists
+    res.sendFile(filePath);
   });
 });
 
-app.use(function(req,res){
-res.status(404);
-res.send("File not found")
+// 404 error middleware
+app.use((req, res) => {
+  res.status(404);
+  res.send("File not found");
 });
+
 
 // Routes
 
