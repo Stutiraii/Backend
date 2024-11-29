@@ -63,7 +63,6 @@ app.get("/", (req, res) => {
 
 // GET all documents from a collection
 app.get("/collections/:collectionName", (req, res, next) => {
-  console.log("Fetching data from collection:", req.params.collectionName);
   req.collection.find({}).toArray((err, results) => {
     if (err) {
       console.error("Error fetching data:", err);
@@ -135,10 +134,8 @@ app.put("/collections/:collectionName/:id", (req, res, next) => {
 
 // DELETE: Remove a document by ID
 app.delete("/collections/:collectionName/:id", (req, res, next) => {
-  console.log("Deleting document with ID:", req.params.id);
   req.collection.deleteOne({ _id: new ObjectId(req.params.id) }, (err, result) => {
     if (err) {
-      console.error("Error deleting document:", err);
       return next(err);
     }
     res.send(result.deletedCount === 1 ? { msg: "success" } : { msg: "error" }); // Response based on delete count
@@ -158,6 +155,5 @@ app.use((req, res) => {
 
 // General error-handling middleware
 app.use((err, req, res, next) => {
-  console.error("Error details:", err); // Log the error
   res.status(500).send({ msg: "Internal Server Error", error: err.message }); // Send generic error response
 });
