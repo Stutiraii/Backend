@@ -59,26 +59,13 @@ app.param("collectionName", function (req, res, next, collectionName) {
 const staticPath = path.join(__dirname, "static");
 
 // Middleware to serve static files
-app.use((req, res, next) => {
-  const filePath = path.join(staticPath, req.url);
-
-  // Check if the file exists
-  fs.stat(filePath, (err, fileInfo) => {
-    if (err || !fileInfo.isFile()) {
-      // If file doesn't exist, pass to the next middleware
-      next();
-      return;
-    }
-
-    // Serve the file if it exists
-    res.sendFile(filePath);
-  });
-});
+app.use("/static", express.static(staticPath, {
+  fallthrough: true, // Passes req to next middleware if file is not found
+}));
 
 // 404 error middleware
 app.use((req, res) => {
-  res.status(404);
-  res.send("File not found");
+  res.status(404).send("File not found");
 });
 
 
