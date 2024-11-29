@@ -80,18 +80,42 @@ app.get('/collections/:collectionName/:id'
    });
   });
 
-
-// POST a new document to the specified collection
-app.post("/collections/:collectionName", function (req, res, next) {
-  console.log("Inserting new document into collection:", req.params.collectionName);
-  req.collection.insertOne(req.body, function (err, result) {
-    if (err) {
-      console.error("Error inserting document:", err);
-      return next(err);
+  app.get("/search", async (req, res) => {
+    try {
+      const query = req.query.q || ""; // Retrieve the search query
+      if (!query) {
+        return res.status(400).send({ error: "Search query is required" });
+      }
+  
+      // Search in "subject", "location", "price", and "availableSpaces"
+      const results = await db.collection("lessons").find({
+        $or: [
+          { subject: { $regex: query, $options: "i" } }, // Case-insensitive
+          { location: { $regex: query, $options: "i" } },
+          { price: { $regex: query, $options: "i" } },
+          { availableSpaces: { $regex: query, $options: "i" } }
+        ]
+      }).toArray();
+  
+      res.status(200).json(results);
+    } catch (err) {
+      console.error("Error during search:", err);
+      res.status(500).send({ error: "Internal Server Error" });
     }
-    res.send(result);
+  });
+  
+
+// POST Route to create a document from a specified collection
+app.post('/collections/:collectionName', function(req, res, next) {
+    
+  req.collection.insertOne(req.body, function(err, results) {
+  if (err) {
+      return next(err);
+  }
+  res.send(results);
   });
 });
+  
 
 // PUT (update) an existing document by ID in the specified collection
 app.put("/collections/:collectionName/:id", function (req, res, next) {
