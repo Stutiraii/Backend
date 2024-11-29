@@ -55,20 +55,6 @@ app.param("collectionName", function (req, res, next, collectionName) {
   next();
 });
 
-// Define the static file path
-const staticPath = path.join(__dirname, "static");
-
-// Middleware to serve static files
-app.use("/static", express.static(staticPath, {
-  fallthrough: true, // Passes req to next middleware if file is not found
-}));
-
-// 404 error middleware
-app.use((req, res) => {
-  res.status(404).send("File not found");
-});
-
-
 // Routes
 
 // Root route
@@ -163,6 +149,21 @@ app.delete("/collections/:collectionName/:id", function (req, res, next) {
     res.send(result.deletedCount === 1 ? { msg: "success" } : { msg: "error" });
   });
 });
+
+
+// Define the static file path
+const staticPath = path.join(__dirname, "static");
+
+// Middleware to serve static files
+app.use("/static", express.static(staticPath, {
+  fallthrough: true, // Passes req to next middleware if file is not found
+}));
+
+// 404 error middleware
+app.use((req, res) => {
+  res.status(404).send("File not found");
+});
+
 
 // Error handling middleware
 app.use((err, req, res, next) => {
