@@ -2,6 +2,7 @@ const { MongoClient, ServerApiVersion, ObjectId } = require("mongodb");
 const express = require("express");
 const cors = require("cors");
 const path = require("path");
+const fs= require("fs");
 const propertiesReader = require("properties-reader");
 const morgan = require("morgan");
 
@@ -52,6 +53,23 @@ client.connect()
 app.param("collectionName", function (req, res, next, collectionName) {
   req.collection = db.collection(collectionName);
   next();
+});
+
+
+const staticPath= path.join(__dirname,"static");
+app.use( function(req,res,next){
+  const filePath= path.join(__dirname,"static",req.url);
+  fs.stat(filePath,function(err,fileInfo){
+    if(err){
+      next();
+        return;
+    }
+  });
+});
+
+app.use(function(req,res){
+res.status(404);
+res.send("File not found")
 });
 
 // Routes
@@ -123,33 +141,19 @@ app.post('/collections/:collectionName', function(req, res, next) {
   
 
 // PUT (update) an existing document by ID in the specified collection
-app.put("/collections/:collectionName/:id", async (req, res, next) => {
-  try {
-    const lessonId = new ObjectId(req.params.id);  // Convert the ID to ObjectId
-    const { availableSpaces } = req.body;  // Get the availableSpaces from the request body
-
-    // Ensure the availableSpaces field is provided
-    if (typeof availableSpaces === 'undefined') {
-      return res.status(400).send('availableSpaces field is required');
-    }
-
-    // Find the lesson by ID and update availableSpaces
-    const result = await req.collection.updateOne(
-      { _id: lessonId },  // Filter by lesson ID
-      { $set: { availableSpaces } }  // Set the new availableSpaces value
-    );
-
-    if (result.matchedCount === 0) {
-      return res.status(404).send('Lesson not found');
-    }
-
-    res.send({ msg: 'Lesson updated successfully' });  // Send a success message
-  } catch (error) {
-    console.error('Error updating lesson:', error);
-    res.status(500).send(`Failed to update lesson: ${error.message}`);
-  }
-});
-
+app.put('/collections/:collectionName/:id', function(req, res, next) {
+   // TODO: Validate req.body
+   req.collection.updateOne({_id: new ObjectId(req.params.id)},
+   {$set: req.body},
+   {safe: true, multi: false}, function(err, result) {
+   if (err) {
+   return next(err);
+   } else {
+   res.send((result.matchedCount === 1) ? {msg: "success"} : {msg: "error"});
+   }
+   }
+   );
+  });
 
 // DELETE a document by ID from the specified collection
 app.delete("/collections/:collectionName/:id", function (req, res, next) {
