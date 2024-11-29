@@ -1,25 +1,25 @@
+// Import required modules
 const { MongoClient, ServerApiVersion, ObjectId } = require("mongodb");
 const express = require("express");
 const cors = require("cors");
 const path = require("path");
-const fs= require("fs");
+const fs = require("fs");
 const propertiesReader = require("properties-reader");
 const morgan = require("morgan");
 
+// Initialize Express app
 const app = express();
 
-// Middleware for parsing JSON
-app.use(express.json());
-// Enable CORS for all origins
-app.use(cors());
-// Enable HTTP request logging
-app.use(morgan("short"));
+// Middleware setup
+app.use(express.json()); // Parse JSON request bodies
+app.use(cors()); // Enable CORS for all origins
+app.use(morgan("short")); // Log HTTP requests
 
-// Load the properties from the db.properties file
+// Load database properties
 let propertiesPath = path.resolve(__dirname, "config/db.properties");
 let properties = propertiesReader(propertiesPath);
 
-// Retrieve the properties
+// Extract database configuration details from properties file
 let dbPprefix = properties.get("db.prefix");
 let dbUsername = encodeURIComponent(properties.get("db.user"));
 let dbPwd = encodeURIComponent(properties.get("db.pwd"));
@@ -27,146 +27,137 @@ let dbName = properties.get("db.dbName");
 let dbUrl = properties.get("db.dbUrl");
 let dbParams = properties.get("db.params");
 
-// Construct the MongoDB URI
-const uri = dbPprefix + dbUsername + ":" + dbPwd + dbUrl + dbParams;
+// Construct MongoDB URI
+const uri = `${dbPprefix}${dbUsername}:${dbPwd}${dbUrl}${dbParams}`;
 
 // Create MongoDB client instance
 const client = new MongoClient(uri, { serverApi: ServerApiVersion.v1 });
-let db =  client.db(dbName);
+let db = client.db(dbName);
 
 // Connect to MongoDB Atlas
-client.connect()
+client
+  .connect()
   .then(() => {
     console.log("Connected to MongoDB Atlas!");
-    
+
+    // Start Express server after successful DB connection
     app.listen(process.env.PORT || 3000, () => {
       console.log(`Server running on port ${process.env.PORT || 3000}`);
     });
-    
   })
-  .catch(err => {
-    console.error("Error connecting to MongoDB Atlas", err);
-    process.exit(1); // Exit if unable to connect to MongoDB
+  .catch((err) => {
+    console.error("Error connecting to MongoDB Atlas:", err);
+    process.exit(1); // Exit process if unable to connect to MongoDB
   });
 
-// Middleware to handle collection name dynamically
-app.param("collectionName", function (req, res, next, collectionName) {
-  req.collection = db.collection(collectionName);
+// Middleware for handling dynamic collection names
+app.param("collectionName", (req, res, next, collectionName) => {
+  req.collection = db.collection(collectionName); // Bind the requested collection to the request object
   next();
 });
-
-// Routes
 
 // Root route
 app.get("/", (req, res) => {
   res.send("Welcome to the backend API!");
-}); 
+});
 
-// GET all documents in the specified collection
-app.get("/collections/:collectionName", function (req, res, next) {
+// GET all documents from a collection
+app.get("/collections/:collectionName", (req, res, next) => {
   console.log("Fetching data from collection:", req.params.collectionName);
-  req.collection.find({}).toArray(function (err, results) {
+  req.collection.find({}).toArray((err, results) => {
     if (err) {
       console.error("Error fetching data:", err);
-      return next(err);
+      return next(err); // Pass error to error-handling middleware
     }
-    console.log("Results:", results);
-    res.send(results);
+    res.send(results); // Send the results as the response
   });
 });
 
-
-app.get('/collections/:collectionName/:id'
-  , function(req, res, next) {
-   req.collection.findOne({ _id: new ObjectId(req.params.id) }, function(err, results) {
-   if (err) {
-   return next(err);
-   }
-   res.send(results);
-   });
-  });
-
-  app.get("/search", async (req, res) => {
-    try {
-      const query = req.query.q || ""; // Retrieve the search query
-      if (!query) {
-        return res.status(400).send({ error: "Search query is required" });
-      }
-  
-      // Search in "subject", "location", "price", and "availableSpaces"
-      const results = await db.collection("lessons").find({
-        $or: [
-          { subject: { $regex: query, $options: "i" } }, // Case-insensitive
-          { location: { $regex: query, $options: "i" } },
-          { price: { $regex: query, $options: "i" } },
-          { availableSpaces: { $regex: query, $options: "i" } }
-        ]
-      }).toArray();
-  
-      res.status(200).json(results);
-    } catch (err) {
-      console.error("Error during search:", err);
-      res.status(500).send({ error: "Internal Server Error" });
-    }
-  });
-  
-
-// POST Route to create a document from a specified collection
-app.post('/collections/:collectionName', function(req, res, next) {
-    
-  req.collection.insertOne(req.body, function(err, results) {
-  if (err) {
+// GET a single document by ID from a collection
+app.get("/collections/:collectionName/:id", (req, res, next) => {
+  req.collection.findOne({ _id: new ObjectId(req.params.id) }, (err, result) => {
+    if (err) {
       return next(err);
+    }
+    res.send(result); // Send the found document
+  });
+});
+
+// Search endpoint
+app.get("/search", async (req, res) => {
+  try {
+    const query = req.query.q || ""; // Retrieve the search query
+    if (!query) {
+      return res.status(400).send({ error: "Search query is required" }); // Validate input
+    }
+
+    // Perform search across multiple fields
+    const results = await db.collection("lessons").find({
+      $or: [
+        { subject: { $regex: query, $options: "i" } }, // Case-insensitive
+        { location: { $regex: query, $options: "i" } },
+        { price: { $regex: query, $options: "i" } },
+        { availableSpaces: { $regex: query, $options: "i" } },
+      ],
+    }).toArray();
+
+    res.status(200).json(results); // Respond with search results
+  } catch (err) {
+    console.error("Error during search:", err);
+    res.status(500).send({ error: "Internal Server Error" }); // Handle errors
   }
-  res.send(results);
+});
+
+// POST: Add a new document to a collection
+app.post("/collections/:collectionName", (req, res, next) => {
+  req.collection.insertOne(req.body, (err, results) => {
+    if (err) {
+      return next(err);
+    }
+    res.send(results); // Respond with the inserted document details
   });
 });
-  
 
-// PUT (update) an existing document by ID in the specified collection
-app.put('/collections/:collectionName/:id', function(req, res, next) {
-   // TODO: Validate req.body
-   req.collection.updateOne({_id: new ObjectId(req.params.id)},
-   {$set: req.body},
-   {safe: true, multi: false}, function(err, result) {
-   if (err) {
-   return next(err);
-   } else {
-   res.send((result.matchedCount === 1) ? {msg: "success"} : {msg: "error"});
-   }
-   }
-   );
-  });
+// PUT: Update an existing document by ID
+app.put("/collections/:collectionName/:id", (req, res, next) => {
+  req.collection.updateOne(
+    { _id: new ObjectId(req.params.id) }, // Match the document by ID
+    { $set: req.body }, // Update with new data
+    { safe: true, multi: false }, // Update options
+    (err, result) => {
+      if (err) {
+        return next(err);
+      }
+      res.send(result.matchedCount === 1 ? { msg: "success" } : { msg: "error" }); // Response based on match count
+    }
+  );
+});
 
-// DELETE a document by ID from the specified collection
-app.delete("/collections/:collectionName/:id", function (req, res, next) {
+// DELETE: Remove a document by ID
+app.delete("/collections/:collectionName/:id", (req, res, next) => {
   console.log("Deleting document with ID:", req.params.id);
-  req.collection.deleteOne({ _id: new ObjectId(req.params.id) }, function (err, result) {
+  req.collection.deleteOne({ _id: new ObjectId(req.params.id) }, (err, result) => {
     if (err) {
       console.error("Error deleting document:", err);
       return next(err);
     }
-    res.send(result.deletedCount === 1 ? { msg: "success" } : { msg: "error" });
+    res.send(result.deletedCount === 1 ? { msg: "success" } : { msg: "error" }); // Response based on delete count
   });
 });
 
-
-// Define the static file path
+// Serve static files from the "static" directory
 const staticPath = path.join(__dirname, "static");
-
-// Middleware to serve static files
 app.use("/static", express.static(staticPath, {
-  fallthrough: true, // Passes req to next middleware if file is not found
+  fallthrough: true, // Passes request to next middleware if file not found
 }));
 
-// 404 error middleware
+// 404 middleware for unmatched routes
 app.use((req, res) => {
-  res.status(404).send("File not found");
+  res.status(404).send("File not found"); // Respond with 404 error for unmatched routes
 });
 
-
-// Error handling middleware
+// General error-handling middleware
 app.use((err, req, res, next) => {
-  console.error("Error details:", err);
-  res.status(500).send({ msg: "Internal Server Error", error: err.message });
+  console.error("Error details:", err); // Log the error
+  res.status(500).send({ msg: "Internal Server Error", error: err.message }); // Send generic error response
 });
