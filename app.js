@@ -98,7 +98,7 @@ app.get('/search', async (req, res) => {
       // If it's a valid number, perform exact match on numeric fields
       filter.$or = [
         { price: queryAsInt },          // Exact match for price
-        { availability: queryAsInt }    // Exact match for availability
+        { availableSpaces: queryAsInt }    // Exact match for availability
       ];
     } else {
       // Handle non-numeric queries, apply regex search on string fields
