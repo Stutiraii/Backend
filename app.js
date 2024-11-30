@@ -84,27 +84,43 @@ app.get("/collections/:collectionName/:id", (req, res, next) => {
 
 // GET Route to handle search requests
 app.get('/search', async (req, res) => {
-  const { query } = req.query;
+  const query = req.query.q || ""; // Retrieve the search query
   const queryAsInt = parseInt(query, 10);
-
+  
+  // Log the query for debugging purposes (remove before production)
+  console.log("Search query:", query);
+  
   try {
-      const filter = {};
+    const filter = {};
 
-      if (query) {
-          filter.$or = [
-              { subject: { $regex: query, $options: 'i' } },
-              { location: { $regex: query, $options: 'i' } },
-              { price: queryAsInt },
-              { availability: queryAsInt }
-          ];
-      }
-      const lesson = await db.collection('lessons').find(filter).toArray();
-      res.json(lesson);
+    // Check if the query is a valid number
+    if (!isNaN(queryAsInt)) {
+      // If it's a valid number, perform exact match on numeric fields
+      filter.$or = [
+        { price: queryAsInt },          // Exact match for price
+        { availability: queryAsInt }    // Exact match for availability
+      ];
+    } else {
+      // Handle non-numeric queries, apply regex search on string fields
+      filter.$or = [
+        { subject: { $regex: query, $options: 'i' } },   // Case-insensitive search for subject
+        { location: { $regex: query, $options: 'i' } }    // Case-insensitive search for location
+      ];
+    }
+
+    // Perform the search with the filter
+    const lessons = await db.collection('lessons').find(filter).toArray();
+
+    // Respond with the found lessons
+    res.json(lessons);
+
   } catch (error) {
-      console.error(error);
-      res.status(500).send('Internal Server Error');
+    // Log the error and respond with a 500 status code
+    console.error("Error during search:", error);
+    res.status(500).send('Internal Server Error');
   }
 });
+
 
 // POST: Add a new document to a collection
 app.post("/collections/:collectionName", (req, res, next) => {
