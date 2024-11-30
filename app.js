@@ -82,28 +82,27 @@ app.get("/collections/:collectionName/:id", (req, res, next) => {
   });
 });
 
-// Search endpoint
-app.get("/search", async (req, res) => {
+// GET Route to handle search requests
+app.get('/search', async (req, res) => {
+  const { query } = req.query;
+  const queryAsInt = parseInt(query, 10);
+
   try {
-    const query = req.query.q || ""; // Retrieve the search query
-    if (!query) {
-      return res.status(400).send({ error: "Search query is required" }); // Validate input
-    }
+      const filter = {};
 
-    // Perform search across multiple fields
-    const results = await db.collection("lessons").find({
-      $or: [
-        { subject: { $regex: query, $options: "i" } }, // Case-insensitive
-        { location: { $regex: query, $options: "i" } },
-        { price: { $regex: query, $options: "i" } },
-        { availableSpaces: { $regex: query, $options: "i" } },
-      ],
-    }).toArray();
-
-    res.status(200).json(results); // Respond with search results
-  } catch (err) {
-    console.error("Error during search:", err);
-    res.status(500).send({ error: "Internal Server Error" }); // Handle errors
+      if (query) {
+          filter.$or = [
+              { subject: { $regex: query, $options: 'i' } },
+              { location: { $regex: query, $options: 'i' } },
+              { price: queryAsInt },
+              { availability: queryAsInt }
+          ];
+      }
+      const lesson = await db.collection('lessons').find(filter).toArray();
+      res.json(lesson);
+  } catch (error) {
+      console.error(error);
+      res.status(500).send('Internal Server Error');
   }
 });
 
