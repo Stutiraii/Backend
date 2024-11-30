@@ -1,0 +1,112 @@
+[{
+  "_id": {
+    "$oid": "6745f480a10226ae8c57a48d"
+  },
+  "id": 1,
+  "subject": "Mathematics",
+  "location": "Building A",
+  "price": 100,
+  "availableSpaces": 2,
+  "icon": "fas fa-calculator",
+  "name": "Updated Biaggi",
+  "phone": 987654321
+},
+{
+  "_id": {
+    "$oid": "6745f480a10226ae8c57a48e"
+  },
+  "id": 2,
+  "subject": "Physics",
+  "location": "Building B",
+  "price": 80,
+  "availableSpaces": 5,
+  "icon": "fas fa-atom"
+},
+{
+  "_id": {
+    "$oid": "6745f480a10226ae8c57a48f"
+  },
+  "id": 3,
+  "subject": "Biology",
+  "location": "Building C",
+  "price": 90,
+  "availableSpaces": 0,
+  "icon": "fas fa-dna"
+},
+{
+  "_id": {
+    "$oid": "6745f480a10226ae8c57a490"
+  },
+  "id": 4,
+  "subject": "Chemistry",
+  "location": "Building D",
+  "price": 95,
+  "availableSpaces": 1,
+  "icon": "fas fa-flask"
+},
+{
+  "_id": {
+    "$oid": "6745f480a10226ae8c57a491"
+  },
+  "id": 5,
+  "subject": "Computer Science",
+  "location": "Building E",
+  "price": 85,
+  "availableSpaces": 4,
+  "icon": "fas fa-laptop-code"
+},
+{
+  "_id": {
+    "$oid": "6745f480a10226ae8c57a492"
+  },
+  "id": 6,
+  "subject": "History",
+  "location": "Building F",
+  "price": 70,
+  "availableSpaces": 5,
+  "icon": "fas fa-landmark"
+},
+{
+  "_id": {
+    "$oid": "6745f480a10226ae8c57a493"
+  },
+  "id": 7,
+  "subject": "Geography",
+  "location": "Building G",
+  "price": 75,
+  "availableSpaces": 5,
+  "icon": "fas fa-globe"
+},
+{
+  "_id": {
+    "$oid": "6745f480a10226ae8c57a494"
+  },
+  "id": 8,
+  "subject": "English",
+  "location": "Building H",
+  "price": 60,
+  "availableSpaces": 5,
+  "icon": "fas fa-book"
+},
+{
+  "_id": {
+    "$oid": "6745f480a10226ae8c57a495"
+  },
+  "id": 9,
+  "subject": "Art",
+  "location": "Building I",
+  "price": 65,
+  "availableSpaces": 4,
+  "icon": "fas fa-paint-brush"
+},
+{
+  "_id": {
+    "$oid": "6745f480a10226ae8c57a496"
+  },
+  "id": 10,
+  "subject": "Music",
+  "location": "Building J",
+  "price": 50,
+  "availableSpaces": 5,
+  "icon": "fas fa-music"
+}]

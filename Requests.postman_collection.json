@@ -1,0 +1,92 @@
+{
+	"info": {
+		"_postman_id": "c1f93715-9f3d-4c52-897e-d28be1157108",
+		"name": "Requests",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+		"_exporter_id": "40019224"
+	},
+	"item": [
+		{
+			"name": "Read All",
+			"request": {
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "http://localhost:3000/collections/lessons",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "3000",
+					"path": [
+						"collections",
+						"lessons"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Post order",
+			"request": {
+				"auth": {
+					"type": "inherit"
+				},
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{\r\n    \"name\": \"Biaggi\",\r\n    \"phone\": 39874379,\r\n    \"lessonIds\": [2, 3],\r\n    \"spaces\": [3, 1]\r\n}\r\n",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "http://localhost:3000/collections/orders",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "3000",
+					"path": [
+						"collections",
+						"orders"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "PUT",
+			"request": {
+				"method": "PUT",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{\r\n    \"name\": \"Updated Biaggi\",\r\n    \"phone\": 987654321\r\n}\r\n",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "http://localhost:3000/collections/lessons/6745f480a10226ae8c57a48d",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "3000",
+					"path": [
+						"collections",
+						"lessons",
+						"6745f480a10226ae8c57a48d"
+					]
+				}
+			},
+			"response": []
+		}
+	]
+}
