@@ -85,32 +85,27 @@ app.get("/collections/:collectionName/:id", (req, res, next) => {
 // Search endpoint
 app.get("/search", async (req, res) => {
   try {
-    const query = req.query.q?.trim(); // Retrieve and trim the search query
+    const query = req.query.q || ""; // Retrieve the search query
     if (!query) {
       return res.status(400).send({ error: "Search query is required" }); // Validate input
     }
 
-    // Prepare regex pattern for case-insensitive search
-    const regexQuery = new RegExp(query, "i");
-
     // Perform search across multiple fields
     const results = await db.collection("lessons").find({
       $or: [
-        { subject: { $regex: regexQuery } }, // Case-insensitive regex search for subject
-        { location: { $regex: regexQuery } }, // Case-insensitive regex search for location
-        { price: { $regex: regexQuery } },    // Case-insensitive regex search for price
-        { availableSpaces: { $regex: regexQuery } }, // Case-insensitive regex search for availableSpaces
+        { subject: { $regex: query, $options: "i" } }, // Case-insensitive
+        { location: { $regex: query, $options: "i" } },
+        { price: { $regex: query, $options: "i" } },
+        { availableSpaces: { $regex: query, $options: "i" } },
       ],
     }).toArray();
 
-    // Respond with search results
-    res.status(200).json(results); 
+    res.status(200).json(results); // Respond with search results
   } catch (err) {
-    console.error("Error during search:", err);  // Log errors for debugging
+    console.error("Error during search:", err);
     res.status(500).send({ error: "Internal Server Error" }); // Handle errors
   }
 });
-
 
 // POST: Add a new document to a collection
 app.post("/collections/:collectionName", (req, res, next) => {
