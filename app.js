@@ -74,22 +74,25 @@ app.get("/collections/:collectionName", (req, res, next) => {
 
 // GET a single document by ID from a collection
 app.get("/collections/:collectionName/:id", (req, res, next) => {
-  req.collection.findOne({ _id: new ObjectId(req.params.id) }, (err, result) => {
-    if (err) {
-      return next(err);
+  req.collection.findOne(
+    { _id: new ObjectId(req.params.id) },
+    (err, result) => {
+      if (err) {
+        return next(err);
+      }
+      res.send(result); // Send the found document
     }
-    res.send(result); // Send the found document
-  });
+  );
 });
 
 // GET Route to handle search requests
-app.get('/search', async (req, res) => {
+app.get("/search", async (req, res) => {
   const query = req.query.q || ""; // Retrieve the search query
   const queryAsInt = parseInt(query, 10);
-  
+
   // Log the query for debugging purposes (remove before production)
   console.log("Search query:", query);
-  
+
   try {
     const filter = {};
 
@@ -97,30 +100,28 @@ app.get('/search', async (req, res) => {
     if (!isNaN(queryAsInt)) {
       // If it's a valid number, perform exact match on numeric fields
       filter.$or = [
-        { price: queryAsInt },          // Exact match for price
-        { availableSpaces: queryAsInt }    // Exact match for availability
+        { price: queryAsInt }, // Exact match for price
+        { availableSpaces: queryAsInt }, // Exact match for availability
       ];
     } else {
       // Handle non-numeric queries, apply regex search on string fields
       filter.$or = [
-        { subject: { $regex: query, $options: 'i' } },   // Case-insensitive search for subject
-        { location: { $regex: query, $options: 'i' } }    // Case-insensitive search for location
+        { subject: { $regex: query, $options: "i" } }, // Case-insensitive search for subject
+        { location: { $regex: query, $options: "i" } }, // Case-insensitive search for location
       ];
     }
 
     // Perform the search with the filter
-    const lessons = await db.collection('lessons').find(filter).toArray();
+    const lessons = await db.collection("lessons").find(filter).toArray();
 
     // Respond with the found lessons
     res.json(lessons);
-
   } catch (error) {
     // Log the error and respond with a 500 status code
     console.error("Error during search:", error);
-    res.status(500).send('Internal Server Error');
+    res.status(500).send("Internal Server Error");
   }
 });
-
 
 // POST: Add a new document to a collection
 app.post("/collections/:collectionName", (req, res, next) => {
@@ -142,26 +143,36 @@ app.put("/collections/:collectionName/:id", (req, res, next) => {
       if (err) {
         return next(err);
       }
-      res.send(result.matchedCount === 1 ? { msg: "success" } : { msg: "error" }); // Response based on match count
+      res.send(
+        result.matchedCount === 1 ? { msg: "success" } : { msg: "error" }
+      ); // Response based on match count
     }
   );
 });
 
 // DELETE: Remove a document by ID
 app.delete("/collections/:collectionName/:id", (req, res, next) => {
-  req.collection.deleteOne({ _id: new ObjectId(req.params.id) }, (err, result) => {
-    if (err) {
-      return next(err);
+  req.collection.deleteOne(
+    { _id: new ObjectId(req.params.id) },
+    (err, result) => {
+      if (err) {
+        return next(err);
+      }
+      res.send(
+        result.deletedCount === 1 ? { msg: "success" } : { msg: "error" }
+      ); // Response based on delete count
     }
-    res.send(result.deletedCount === 1 ? { msg: "success" } : { msg: "error" }); // Response based on delete count
-  });
+  );
 });
 
 // Serve static files from the "static" directory
 const staticPath = path.join(__dirname, "static");
-app.use("/static", express.static(staticPath, {
-  fallthrough: true, // Passes request to next middleware if file not found
-}));
+app.use(
+  "/static",
+  express.static(staticPath, {
+    fallthrough: true, // Passes request to next middleware if file not found
+  })
+);
 
 // 404 middleware for unmatched routes
 app.use((req, res) => {
